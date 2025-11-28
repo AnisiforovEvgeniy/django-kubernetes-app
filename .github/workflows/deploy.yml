@@ -41,7 +41,7 @@ jobs:
       packages: write
     env:
       REGISTRY: ghcr.io
-      IMAGE_NAME: ${{ github.repository }}
+      IMAGE_NAME: anisiforovevgeniy/django-kubernetes-app
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
