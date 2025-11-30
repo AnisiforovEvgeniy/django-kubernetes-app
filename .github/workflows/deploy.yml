@@ -59,7 +59,7 @@ jobs:
           docker push $REGISTRY/$IMAGE_NAME:latest
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: build-and-push
     if: github.ref == 'refs/heads/main'
     steps:
