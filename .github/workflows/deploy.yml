@@ -75,13 +75,20 @@ jobs:
         run: |
           echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > kubeconfig
           export KUBECONFIG=kubeconfig
-          kubectl create namespace django-app --dry-run=client -o yaml | kubectl apply -f -
-          kubectl apply -f k8s-manifests/ -n django-app
-          # Создаем секрет вручную (для учебной работы)
-          kubectl create secret generic django-secrets \
+
+          # Используем microk8s.kubectl вместо kubectl
+          /snap/bin/microk8s.kubectl create namespace django-app --dry-run=client -o yaml | /snap/bin/microk8s.kubectl apply -f -
+          /snap/bin/microk8s.kubectl apply -f k8s-manifests/ -n django-app
+
+          # Создаем секрет
+          /snap/bin/microk8s.kubectl create secret generic django-secrets \
             --namespace django-app \
             --from-literal=db_user="django_user" \
             --from-literal=db_password="SuperSecret123!" \
             --from-literal=secret_key="django-insecure-your-secret-key-here"
-          kubectl set image deployment/django-deployment django-app=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} -n django-app
-          kubectl rollout status deployment/django-deployment -n django-app --timeout=300s
+
+          # Обновляем образ
+          /snap/bin/microk8s.kubectl set image deployment/django-deployment django-app=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} -n django-app
+
+          # Ждем завершения rollout
+          /snap/bin/microk8s.kubectl rollout status deployment/django-deployment -n django-app --timeout=300s
