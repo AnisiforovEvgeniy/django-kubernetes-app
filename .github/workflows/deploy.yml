@@ -71,9 +71,17 @@ jobs:
           mkdir -p $HOME/.kube
           echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
 
-      - name: Apply Kubernetes manifests
+      - name: Deploy to Kubernetes
         run: |
-          kubectl apply -f k8s-manifests/namespace.yaml
-          kubectl apply -f k8s-manifests/configmap.yaml
-          kubectl apply -f k8s-manifests/postgres/ -n django-app
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > kubeconfig
+          export KUBECONFIG=kubeconfig
+          kubectl create namespace django-app --dry-run=client -o yaml | kubectl apply -f -
           kubectl apply -f k8s-manifests/ -n django-app
+          # Создаем секрет вручную (для учебной работы)
+          kubectl create secret generic django-secrets \
+            --namespace django-app \
+            --from-literal=db_user="django_user" \
+            --from-literal=db_password="SuperSecret123!" \
+            --from-literal=secret_key="django-insecure-your-secret-key-here"
+          kubectl set image deployment/django-deployment django-app=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} -n django-app
+          kubectl rollout status deployment/django-deployment -n django-app --timeout=300s

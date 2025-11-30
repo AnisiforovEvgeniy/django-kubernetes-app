@@ -1,7 +1,8 @@
 import socket
 from django.http import HttpResponse
 
-
 def index(request):
     hostname = socket.gethostname()
-    return HttpResponse(f"Hello from {hostname}")
+    version_text = "Авто-деплой работает! Версия: 1"
+    return HttpResponse(f"<h2>{version_text}</h2><p>Served by pod: {hostname}</p>")
+
