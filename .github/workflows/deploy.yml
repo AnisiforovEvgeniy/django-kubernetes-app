@@ -85,7 +85,8 @@ jobs:
             --namespace django-app \
             --from-literal=db_user="django_user" \
             --from-literal=db_password="SuperSecret123!" \
-            --from-literal=secret_key="django-insecure-your-secret-key-here"
+            --from-literal=secret_key="django-insecure-your-secret-key-here" \
+            --dry-run=client -o yaml | /snap/bin/microk8s.kubectl apply -f -
 
           # Обновляем образ
           /snap/bin/microk8s.kubectl set image deployment/django-deployment django-app=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} -n django-app
