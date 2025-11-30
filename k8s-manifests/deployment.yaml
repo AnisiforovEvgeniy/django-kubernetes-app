@@ -14,7 +14,7 @@ spec:
         app: django-app
     spec:
       containers:
-        - name: django-container
+        - name: django-app
           image: ghcr.io/anisiforovevgeniy/django-kubernetes-app:latest
           imagePullPolicy: Always
           ports:
