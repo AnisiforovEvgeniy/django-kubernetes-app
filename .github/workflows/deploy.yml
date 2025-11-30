@@ -83,9 +83,10 @@ jobs:
           # Создаем секрет
           /snap/bin/microk8s.kubectl create secret generic django-secrets \
             --namespace django-app \
-            --from-literal=db_user="django_user" \
-            --from-literal=db_password="SuperSecret123!" \
-            --from-literal=secret_key="django-insecure-your-secret-key-here" \
+            --from-literal=DB_NAME="django_prod" \
+            --from-literal=DB_USER="django_user" \
+            --from-literal=DB_PASSWORD="SuperSecret123!" \
+            --from-literal=SECRET_KEY="django-insecure-your-secret-key-here" \
             --dry-run=client -o yaml | /snap/bin/microk8s.kubectl apply -f -
 
           # Обновляем образ
