@@ -52,11 +52,11 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t $REGISTRY/$IMAGE_NAME:latest .
+          docker build -t $REGISTRY/$IMAGE_NAME:${{ github.sha }} .
 
       - name: Push Docker image
         run: |
-          docker push $REGISTRY/$IMAGE_NAME:latest
+          docker push $REGISTRY/$IMAGE_NAME:${{ github.sha }}
 
   deploy:
     runs-on: self-hosted
@@ -90,7 +90,7 @@ jobs:
             --dry-run=client -o yaml | /snap/bin/microk8s.kubectl apply -f -
 
           # Обновляем образ
-          /snap/bin/microk8s.kubectl set image deployment/django-deployment django-app=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} -n django-app
+          /snap/bin/microk8s.kubectl set image deployment/django-deployment django-app=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} -n django-app --container=django-app
 
           # Ждем завершения rollout
           /snap/bin/microk8s.kubectl rollout status deployment/django-deployment -n django-app --timeout=300s
