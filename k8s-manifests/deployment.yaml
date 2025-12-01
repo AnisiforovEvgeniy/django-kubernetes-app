@@ -13,6 +13,8 @@ spec:
       labels:
         app: django-app
     spec:
+      imagePullSecrets:
+        - name: regcred    
       containers:
         - name: django-app
           image: ghcr.io/anisiforovevgeniy/django-kubernetes-app:latest

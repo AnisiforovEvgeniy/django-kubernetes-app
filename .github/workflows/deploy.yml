@@ -93,11 +93,21 @@ jobs:
           echo "${{ secrets.KUBE_CONFIG }}" > kubeconfig
           export KUBECONFIG=kubeconfig
 
-          # Используем microk8s.kubectl вместо kubectl
-          /snap/bin/microk8s.kubectl create namespace django-app --dry-run=client -o yaml | /snap/bin/microk8s.kubectl apply -f -
+          # Создаем namespace
+          /snap/bin/microk8s.kubectl create namespace django-app
+
+          # Создаем docker-registry секрет для ghcr.io
+          /snap/bin/microk8s.kubectl create secret docker-registry regcred \
+            --namespace django-app \
+            --docker-server=ghcr.io \
+            --docker-username=anisiforovevgeniy \
+            --docker-password="${{ secrets.GHCR_READ_TOKEN }}" \
+            --docker-email="anisiforov_04@mail.ru"
+
+          # Применяем манифесты
           /snap/bin/microk8s.kubectl apply -f k8s-manifests/ -n django-app
 
-          # Создаем секрет
+          # Создаем секрет с переменными
           /snap/bin/microk8s.kubectl create secret generic django-secrets \
             --namespace django-app \
             --from-literal=DB_NAME="django_prod" \
@@ -105,9 +115,6 @@ jobs:
             --from-literal=DB_PASSWORD="SuperSecret123!" \
             --from-literal=SECRET_KEY="django-insecure-your-secret-key-here" \
             --dry-run=client -o yaml | /snap/bin/microk8s.kubectl apply -f -
-
-          # Обновляем образ
-          /snap/bin/microk8s.kubectl set image deployment/django-deployment django-app=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} -n django-app --record
 
           # Ждем завершения rollout
           /snap/bin/microk8s.kubectl rollout status deployment/django-deployment -n django-app --timeout=300s
