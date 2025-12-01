@@ -98,5 +98,15 @@ jobs:
           # Обновляем образ
           /snap/bin/microk8s.kubectl set image deployment/django-deployment django-app=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} -n django-app --record
 
-          # Ждем завершения rollout
+          # Ждём, пока хотя бы 1 под станет Ready
+          echo "Ожидание запуска хотя бы одного пода..."
+            /snap/bin/microk8s.kubectl wait --for=condition=ready pod -l app=django-app -n django-app --timeout=120s
+
+          # Запускаем миграции
+          echo "Запуск миграций..."
+            /snap/bin/microk8s.kubectl exec \
+              $(/snap/bin/microk8s.kubectl get pod -n django-app -l app=django-app -o jsonpath='{.items[0].metadata.name}') \
+              -n django-app -- python manage.py migrate --noinput
+
+          # Ждём полного rollout (опционально)
           /snap/bin/microk8s.kubectl rollout status deployment/django-deployment -n django-app --timeout=300s
