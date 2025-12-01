@@ -90,7 +90,7 @@ jobs:
             --dry-run=client -o yaml | /snap/bin/microk8s.kubectl apply -f -
 
           # Обновляем образ
-          /snap/bin/microk8s.kubectl set image deployment/django-deployment django-app=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} -n django-app --container=django-app
+          /snap/bin/microk8s.kubectl set image deployment/django-deployment django-app=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} -n django-app
 
           # Ждем завершения rollout
           /snap/bin/microk8s.kubectl rollout status deployment/django-deployment -n django-app --timeout=300s
