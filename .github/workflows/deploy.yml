@@ -114,7 +114,6 @@ jobs:
             --from-literal=DB_USER="django_user" \
             --from-literal=DB_PASSWORD="SuperSecret123!" \
             --from-literal=SECRET_KEY="django-insecure-your-secret-key-here" \
-            --from-literal=ALLOWED_HOSTS="192.168.1.20,localhost,127.0.0.1" \ 
             --dry-run=client -o yaml | /snap/bin/microk8s.kubectl apply -f -
 
           # Ждем завершения rollout
