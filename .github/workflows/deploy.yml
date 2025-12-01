@@ -71,6 +71,12 @@ jobs:
           mkdir -p $HOME/.kube
           echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
 
+      - name: Debug variables
+        run: |
+          echo "REGISTRY: ${{ env.REGISTRY }}"
+          echo "IMAGE_NAME: ${{ env.IMAGE_NAME }}"
+          echo "SHA: ${{ github.sha }}"
+
       - name: Deploy to Kubernetes
         run: |
           echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > kubeconfig
@@ -90,7 +96,7 @@ jobs:
             --dry-run=client -o yaml | /snap/bin/microk8s.kubectl apply -f -
 
           # Обновляем образ
-          /snap/bin/microk8s.kubectl set image deployment/django-deployment django-app=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} -n django-app
+          /snap/bin/microk8s.kubectl set image deployment/django-deployment django-app=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} -n django-app --record
 
           # Ждем завершения rollout
           /snap/bin/microk8s.kubectl rollout status deployment/django-deployment -n django-app --timeout=300s
